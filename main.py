@@ -3,18 +3,19 @@ import random
 from PyQt5 import uic
 from PyQt5.QtGui import QPainter, QColor
 from PyQt5.QtWidgets import QApplication, QMainWindow
+from UI import Ui_Form
 
 
-class RandomCircles(QMainWindow):
+class RandomCircles(QMainWindow, Ui_Form):
     def __init__(self):
         super().__init__()
-        uic.loadUi('UI.ui', self)
+        self.setupUi(self)
         self.pushButton.clicked.connect(self.draw_random_circle)
         self.circle_coordinates = []
 
     def paintEvent(self, event):
         painter = QPainter(self)
-        painter.setBrush(QColor(255, 255, 0))
+        painter.setBrush(QColor(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)))
         for x, y, radius in self.circle_coordinates:
             painter.drawEllipse(x, y, radius, radius)
 
