@@ -1,35 +1,40 @@
 import sys
-import random
-from PyQt5 import uic
-from PyQt5.QtGui import QPainter, QColor
-from PyQt5.QtWidgets import QApplication, QMainWindow
-from UI import Ui_Form
+
+from PyQt5 import uic, Qt
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem, QHeaderView
+import sqlite3
 
 
-class RandomCircles(QMainWindow, Ui_Form):
+class MyWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setupUi(self)
-        self.pushButton.clicked.connect(self.draw_random_circle)
-        self.circle_coordinates = []
+        uic.loadUi('main.ui', self)
+        self.load_coffes()
+        self.tableWidget.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        self.tableWidget.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.tableWidget.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
 
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setBrush(QColor(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)))
-        for x, y, radius in self.circle_coordinates:
-            painter.drawEllipse(x, y, radius, radius)
+    def load_coffes(self):
+        connection = sqlite3.connect('coffee.sqlite')
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM coffee")
+        data = cursor.fetchall()
 
-    def draw_random_circle(self):
-        self.circle_coordinates = []
-        radius = random.randint(20, 100)
-        x = random.randint(10, 452)
-        y = random.randint(10, 294)
-        self.circle_coordinates.append((x, y, radius))
-        self.update()
+        row_count = len(data)
+        col_count = len(data[0]) if data else 0
+        self.tableWidget.setRowCount(row_count)
+        self.tableWidget.setColumnCount(col_count - 1)
+
+        for row in range(row_count):
+            for col in range(col_count):
+                item = QTableWidgetItem(str(data[row][col]))
+                self.tableWidget.setItem(row, col, item)
+
+        connection.close()
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = RandomCircles()
+    window = MyWindow()
     window.show()
     sys.exit(app.exec_())
